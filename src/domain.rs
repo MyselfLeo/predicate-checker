@@ -249,31 +249,59 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Domain<T> {
 
         if self.parts.is_empty() {return self.clone()}
 
+        let mut remaining_parts = self.parts.clone();
+
         let mut res: Domain<T> = Domain { parts: vec![] };
 
-        let mut i = 0;
+
+
+        while !remaining_parts.is_empty() {
+            println!("    Step: {:?}", res);
+            let mut current = remaining_parts.pop().unwrap();
+
+            let mut j: isize = remaining_parts.len() as isize - 1;
+            while j >= 0 {
+                print!("    Computing union of {:?} and {:?}   ->   ", current, remaining_parts[j as usize]);
+
+                if let Some(union) = Interval::union(current.clone(), remaining_parts[j as usize].clone()) {
+                    current = union;
+                    remaining_parts.remove(j as usize);
+                    println!("{:?}", current);
+                }
+                else {println!("No union")}
+
+                j-=1;
+            }
+            res.parts.push(current);
+        }
+
+
+
+        /*let mut i = 0;
         while i < self.parts.len() {
 
             println!("  Step {i}: {:?}", res);
 
             let mut new_interval = self.parts[i].clone();
 
-            let mut j = i + 1;
-            while j < self.parts.len() {
-                print!("  Computing union of  {:?} and {:?}   -> ", new_interval, self.parts[j]);
-                if let Some(union) = Interval::union(new_interval.clone(), self.parts[j].clone()) {
+            let mut others = Vec::from(self.parts.split_at(i+1).1);
+            let mut j: isize = others.len() as isize - 1;
+            while j >= 0 {
+                print!("  Computing union of  {:?} and {:?}   -> ", new_interval, others[j as usize]);
+                if let Some(union) = Interval::union(new_interval.clone(), others[j as usize].clone()) {
                     new_interval = union;
+                    others.remove(j as usize);
                     println!("{:?}", new_interval);
                 }
                 else {
                     println!("No union");
                 }
-                j += 1;
+                j -= 1;
             }
             res.parts.push(new_interval);
 
             i += 1;
-        }
+        }*/
 
 
 
@@ -293,6 +321,8 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Domain<T> {
             i += 1;
         } */
 
+        println!("Result: {:?}", res);
+
         return res
     }
 }
@@ -301,10 +331,24 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Domain<T> {
 
 impl<T: Num + PartialOrd + Clone + Display> PartialEq for Domain<T> {
     fn eq(&self, other: &Self) -> bool {
+
+        // We must take into account that the order of the intervals may not be the same
         if self.parts.len() != other.parts.len() {return false}
-        for i in 0..self.parts.len() {
-            if self.parts[i] != other.parts[i] {return false}
+        
+        let mut other_parts = other.parts.clone();
+
+        for i in &self.parts {
+            let mut found = false;
+            for (idx, element) in other_parts.clone().iter().enumerate() {
+                if i == element {
+                    found = true;
+                    other_parts.remove(idx);
+                    break;
+                }
+            }
+            if !found {return false}
         }
-        return true
+
+        return other_parts.is_empty()
     }
 }
