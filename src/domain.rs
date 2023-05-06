@@ -268,15 +268,11 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display> Domain<T> {
         let min = min.unwrap().to_isize().unwrap() - 3;
         let max = max.unwrap().to_isize().unwrap() + 3;
 
-        println!("min: {}, max: {}", min.to_f64().unwrap(), max.to_f64().unwrap());
-
         // Compute scale of the graph
         let char_size = (max - min).to_f64().unwrap() / 100.0;
 
         let get_char_idx = |x: T| -> usize {
-            println!("x: {}, min: {}", x.to_f64().unwrap(), min.to_f64().unwrap());
             let idx = (x.to_isize().unwrap() - min.clone()).to_f64().unwrap() / char_size;
-            println!("idx: {}", idx);
             return idx.to_usize().unwrap();
         };
 
