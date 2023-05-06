@@ -1,6 +1,5 @@
 use num::Num;
 
-use crate::simplification;
 use crate::domain::Domain;
 
 
@@ -50,7 +49,7 @@ pub enum Predicate<T: Num + PartialOrd> {
 
 impl<T: Num + PartialOrd + Clone> Predicate<T> {
     /// Simplify the predicate recursively.
-    pub fn simplify(&self) -> Predicate<T> {
+    /*pub fn simplify(&self) -> Predicate<T> {
 
         match self {
             Predicate::True => Predicate::True,
@@ -83,7 +82,7 @@ impl<T: Num + PartialOrd + Clone> Predicate<T> {
             Predicate::Ord(p1, p2) => todo!(),
         }
 
-    }
+    }*/
 
 
 
@@ -199,11 +198,20 @@ impl<T: Num + PartialOrd + Clone> Predicate<T> {
             },
 
 
-            Predicate::Not(_) => todo!(),
-            Predicate::And(_, _) => todo!(),
-            Predicate::Ord(_, _) => todo!(),
+            Predicate::Not(p) => Domain::complement(p.get_domain()),
+            Predicate::And(p1, p2) => Domain::intersection(p1.get_domain(), p2.get_domain()),
+            Predicate::Ord(p1, p2) => Domain::union(p1.get_domain(), p2.get_domain()),
         }
+    }
 
+
+    /// Check if a Predicate implies another Predicate.
+    /// In other terms, check if the Domain of the first Predicate is a subset of the Domain of the second Predicate.
+    pub fn implies(&self, other: &Predicate<T>) -> bool {
+        let d1 = self.get_domain();
+        let d2 = other.get_domain();
+        
+        return !Domain::intersection(d1, d2).is_empty()
     }
 
 }
