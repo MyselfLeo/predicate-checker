@@ -1,3 +1,5 @@
+use crate::{predicate::Predicate, domain::Domain};
+
 pub mod predicate;
 mod domain;
 
@@ -51,9 +53,6 @@ fn main() {
             )
         )
     );
-
-    println!("{}", p1.get_domain().get_graph_string());
-    println!("{}", p2.get_domain().get_graph_string());
 
     println!("{:?}", p2.fits(&p1));
 }
