@@ -39,7 +39,7 @@ pub enum Predicate<T: Num + PartialOrd> {
 
     Not(Box<Predicate<T>>),
     And(Box<Predicate<T>>, Box<Predicate<T>>),
-    Ord(Box<Predicate<T>>, Box<Predicate<T>>)
+    Or(Box<Predicate<T>>, Box<Predicate<T>>)
 }
 
 
@@ -161,18 +161,18 @@ impl<T: Num + PartialOrd + Clone> Predicate<T> {
 
             Predicate::Not(p) => Domain::complement(p.get_domain()),
             Predicate::And(p1, p2) => Domain::intersection(p1.get_domain(), p2.get_domain()),
-            Predicate::Ord(p1, p2) => Domain::union(p1.get_domain(), p2.get_domain()),
+            Predicate::Or(p1, p2) => Domain::union(p1.get_domain(), p2.get_domain()),
         }
     }
 
 
-    /// Check if a Predicate implies another Predicate.
+    /// Check that each value that satisfies the first Predicate also satisfies the second Predicate.
     /// In other terms, check if the Domain of the first Predicate is a subset of the Domain of the second Predicate.
-    pub fn implies(&self, other: &Predicate<T>) -> bool {
-        let d1 = self.get_domain();
-        let d2 = other.get_domain();
+    pub fn fits(&self, other: &Predicate<T>) -> bool {
+        let d1 = self.get_domain().simplified();
+        let d2 = other.get_domain().simplified();
         
-        return !Domain::intersection(d1, d2).is_empty()
+        return Domain::union(d1, d2.clone()) == d2;
     }
 
 }
