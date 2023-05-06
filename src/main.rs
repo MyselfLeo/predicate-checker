@@ -4,12 +4,12 @@ mod domain;
 fn main() {
     
     let p1 = predicate::Predicate::GreaterThan(
-        predicate::Value::Literal(4),
+        predicate::Value::Literal(6),
         predicate::Value::Arg("x".to_string())
     );
 
     let p2 = predicate::Predicate::LowerThan(
-        predicate::Value::Arg("x".to_string()),
+        predicate::Value::Literal(9),
         predicate::Value::Literal(10)
     );
 

@@ -48,45 +48,6 @@ pub enum Predicate<T: Num + PartialOrd> {
 
 
 impl<T: Num + PartialOrd + Clone> Predicate<T> {
-    /// Simplify the predicate recursively.
-    /*pub fn simplify(&self) -> Predicate<T> {
-
-        match self {
-            Predicate::True => Predicate::True,
-            Predicate::False => Predicate::False,
-            Predicate::BoolArg => Predicate::BoolArg,
-
-            Predicate::LowerThan(_, _) => todo!(),
-            Predicate::LowerEqual(_, _) => todo!(),
-            Predicate::GreaterThan(_, _) => todo!(),
-            Predicate::GreaterEqual(_, _) => todo!(),
-            Predicate::Equal(_, _) => todo!(),
-            Predicate::BetweenInclude(_, _, _) => todo!(),
-            Predicate::BetweenExclude(_, _, _) => todo!(),
-            Predicate::BetweenIncExc(_, _, _) => todo!(),
-            Predicate::BetweenExcInc(_, _, _) => todo!(),
-
-
-
-            Predicate::Not(p) => {
-                simplification::not::simplify::<T>(p.simplify())
-            },
-
-
-
-            Predicate::And(p1, p2) => {
-                simplification::and::simplify::<T>(p1.simplify(), p2.simplify())
-            },
-
-
-            Predicate::Ord(p1, p2) => todo!(),
-        }
-
-    }*/
-
-
-
-
     /// Return the domain representing the values for which the predicate is true.
     /// If the predicate is based solely on arguments, the domain is unknown, so a full domain is returned.
     pub fn get_domain(&self) -> Domain<T> {
