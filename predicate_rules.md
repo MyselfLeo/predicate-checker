@@ -1,0 +1,3 @@
+- In the case of an operation between an argument and a literal, the argument must **always** be on the left hand side (`x < 4` instead of `4 >= x`)
+
+- In a boolean operator (and, or) the left hand side Predicate **must** be before the right hand side Predicate in the following list: `LowerThan, LowerEqual, GreaterThan, GreaterEqual, Equal, BetweenInclude, BetweenExclude, BetweenIncExc, BetweenExcInc`
