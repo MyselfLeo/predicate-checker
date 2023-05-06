@@ -1,4 +1,6 @@
-use num::Num;
+use std::fmt::Display;
+
+use num::{Num, ToPrimitive};
 
 
 
@@ -115,7 +117,7 @@ pub struct Domain<T: Num> {
 
 
 
-impl<T: Num + PartialOrd + Clone> Domain<T> {
+impl<T: Num + PartialOrd + Clone + ToPrimitive + Display> Domain<T> {
 
     // Helpful constructors
     pub fn point(x: T) -> Domain<T> {
@@ -214,6 +216,117 @@ impl<T: Num + PartialOrd + Clone> Domain<T> {
         }
 
         return res
+    }
+
+
+
+
+
+
+    /// Return a graphical representation of the Domain.
+    pub fn get_graph_string(&self) -> String {
+        let mut chars = ['-'; 106]; // 2 chars for the arrows, 4 chars for the padding and 100 chars for the graph
+        chars[0] = '<';
+        chars[105] = '>';
+
+        let mut subline = [' '; 106];
+
+        // Get the min and max values
+        let mut min = None;
+        let mut max = None;
+        for i in &self.parts {
+            if let Some(lower) = &i.lower {
+                match &min {
+                    None => min = Some(lower.clone()),
+                    Some(x) => {
+                        if lower < x {min = Some(lower.clone())}
+                    }
+                };
+                match &max {
+                    None => max = Some(lower.clone()),
+                    Some(x) => {
+                        if lower > x {max = Some(lower.clone())}
+                    }
+                }
+            }
+            if let Some(greater) = &i.greater {
+                match &min {
+                    None => min = Some(greater.clone()),
+                    Some(x) => {
+                        if greater < x {min = Some(greater.clone())}
+                    }
+                };
+                match &max {
+                    None => max = Some(greater.clone()),
+                    Some(x) => {
+                        if greater > x {max = Some(greater.clone())}
+                    }
+                }
+            }
+        }
+
+        let min = min.unwrap().to_isize().unwrap() - 3;
+        let max = max.unwrap().to_isize().unwrap() + 3;
+
+        println!("min: {}, max: {}", min.to_f64().unwrap(), max.to_f64().unwrap());
+
+        // Compute scale of the graph
+        let char_size = (max - min).to_f64().unwrap() / 100.0;
+
+        let get_char_idx = |x: T| -> usize {
+            println!("x: {}, min: {}", x.to_f64().unwrap(), min.to_f64().unwrap());
+            let idx = (x.to_isize().unwrap() - min.clone()).to_f64().unwrap() / char_size;
+            println!("idx: {}", idx);
+            return idx.to_usize().unwrap();
+        };
+
+        // Draw each interval
+        for i in &self.parts {
+            let lower_char = match &i.lower {
+                Some(x) => get_char_idx(x.clone()) + 2,
+                None => 1
+            };
+
+            let greater_char = match &i.greater {
+                Some(x) => get_char_idx(x.clone()) - 2,
+                None => 104
+            };
+
+            subline[lower_char] = match &i.lower {
+                Some(x) => x.to_string().chars().nth(0).unwrap(),
+                None => ' '
+            };
+            if i.incl_lower && i.lower.is_some() {
+                chars[lower_char] = '[';
+            } else if i.lower.is_some() {
+                chars[lower_char] = ']';
+            }
+            else {chars[lower_char] = '=';}
+
+
+            subline[greater_char] = match &i.greater {
+                Some(x) => x.to_string().chars().nth(0).unwrap(),
+                None => ' '
+            };
+            if i.incl_greater && i.greater.is_some() {
+                chars[greater_char] = ']';
+            } else if i.greater.is_some() {
+                chars[greater_char] = '[';
+            }
+            else {chars[greater_char] = '=';}
+
+            // draw the line between the two symbols
+            for j in lower_char + 1..greater_char {
+                chars[j] = '=';
+            }
+        }
+
+        // Draw the zero
+        if (min..max).contains(&0) {
+            chars[get_char_idx(T::zero())] = '0';
+        }
+
+        return String::from_iter(chars.iter()) + "\n" + &String::from_iter(subline.iter());
     }
 }
 

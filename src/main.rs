@@ -21,21 +21,39 @@ fn main() {
     println!("{:?}", p3.get_domain());
      */
 
-    let p1 = predicate::Predicate::LowerThan(
-        predicate::Value::Arg("x".to_string()),
-        predicate::Value::Literal(6)
-    );
-    let p2 = predicate::Predicate::GreaterEqual(
-        predicate::Value::Arg("x".to_string()),
-        predicate::Value::Literal(7)
+
+    let p1 = predicate::Predicate::Or(
+        Box::new(
+            predicate::Predicate::LowerThan(
+                predicate::Value::Arg("x".to_string()),
+                predicate::Value::Literal(6)
+            )
+        ),
+        Box::new(
+            predicate::Predicate::GreaterEqual(
+                predicate::Value::Arg("x".to_string()),
+                predicate::Value::Literal(7)
+            )
+        )
     );
 
-    let p3 = predicate::Predicate::Or(Box::new(p1.clone()), Box::new(p2.clone()));
-
-    let p4 = predicate::Predicate::LowerThan(
-        predicate::Value::Arg("x".to_string()),
-        predicate::Value::Literal(4)
+    let p2 = predicate::Predicate::Or(
+        Box::new(
+            predicate::Predicate::LowerThan(
+                predicate::Value::Arg("x".to_string()),
+                predicate::Value::Literal(5)
+            )
+        ),
+        Box::new(
+            predicate::Predicate::GreaterEqual(
+                predicate::Value::Arg("x".to_string()),
+                predicate::Value::Literal(8)
+            )
+        )
     );
 
-    println!("{:?}", p3.fits(&p4));
+    println!("{}", p1.get_domain().get_graph_string());
+    println!("{}", p2.get_domain().get_graph_string());
+
+    println!("{:?}", p2.fits(&p1));
 }

@@ -1,4 +1,6 @@
-use num::Num;
+use std::fmt::Display;
+
+use num::{Num, ToPrimitive};
 
 use crate::domain::Domain;
 
@@ -47,7 +49,7 @@ pub enum Predicate<T: Num + PartialOrd> {
 
 
 
-impl<T: Num + PartialOrd + Clone> Predicate<T> {
+impl<T: Num + PartialOrd + Clone + ToPrimitive + Display> Predicate<T> {
     /// Return the domain representing the values for which the predicate is true.
     /// If the predicate is based solely on arguments, the domain is unknown, so a full domain is returned.
     pub fn get_domain(&self) -> Domain<T> {
