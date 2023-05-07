@@ -260,8 +260,6 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
             let d1 = self.get_domain(a);
             let d2 = other.get_domain(a);
 
-            println!("Union of {:?} & {:?} : {:?}", d1, d2, Domain::union(d1.clone(), d2.clone()));
-
             if Domain::union(d1, d2.clone()) != d2 {return false;}
         }
 
