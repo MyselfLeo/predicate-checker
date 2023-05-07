@@ -1,8 +1,8 @@
-use predicatechecker::parser;
+use predicatechecker::Predicate;
 
 fn main() {
-    let a: predicatechecker::Predicate<f64> = parser::parse_predicate("(x > 2) && (y == 4) && (z < 10)");
-    let b = parser::parse_predicate("(x > 0) && (y > 2)");
+    let a = Predicate::from("(x > 2) && (y == 4) && (z < 10)").unwrap();
+    let b = Predicate::from("(x > 0) && (y > 2)").unwrap();
 
     println!("{}", a.fits(&b));
 }

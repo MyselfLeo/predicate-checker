@@ -3,6 +3,7 @@ use std::{fmt::{Display, Debug}, collections::HashSet};
 use num::{Num, ToPrimitive};
 
 use crate::domain::Domain;
+use crate::parser::parse_predicate;
 
 
 /// In a [Predicate], a value can either be a literal or an argument.
@@ -37,10 +38,23 @@ pub enum Predicate<T: Num + PartialOrd> {
 
 
 
+impl Predicate<f64> {
+    /// Return a predicate from an infix predicate string.
+    /// 
+    /// # Example
+    /// ```
+    /// use predicatechecker::Predicate;
+    /// 
+    /// let p = Predicate::from("(x > 5) && (x < 10)").unwrap();
+    /// ```
+    pub fn from(txt: &str) -> Result<Predicate<f64>, String> {
+        parse_predicate(txt)
+    }
+}
+
 
 
 impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
-
     /// Return the domain representing the values of the given argument where the Predicate is true.
     /// Thus, the "validity domain" of a predicate is made of one domain for each of its arguments.
     /// A Predicate with no arguments could be simplified to a single boolean value, so this function would not be useful.

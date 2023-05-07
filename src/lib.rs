@@ -1,5 +1,5 @@
 mod predicate;
 mod domain;
-pub mod parser;
+mod parser;
 pub use predicate::Predicate;
 pub use predicate::Value;

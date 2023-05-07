@@ -26,16 +26,16 @@ pub enum Token {
 
 
 /// Convert a string into a Vec of tokens
-pub fn parse(txt: &str) -> Vec<Token> {
+pub fn parse(txt: &str) -> Result<Vec<Token>, String> {
     let txt_cleaned = txt.replace("(", " ( ").replace(")", " ) ");
     txt_cleaned.split(' ').filter(|x| !x.trim().is_empty()).map( |t|
-        if t == "true" {Token::Boolean(true)}
-        else if t == "false" {Token::Boolean(false)}
-        else if OPERATORS.contains(&t) {Token::Operator(t.to_string())}
-        else if SEPARATORS.contains(&t) {Token::Separator(t.to_string())}
-        else if t.parse::<f64>().is_ok() {Token::Literal(t.parse::<f64>().unwrap())}
-        else if t.chars().next().unwrap().is_alphabetic() {Token::Arg(t.to_string())}
-        else {panic!("Invalid token: {}", t)}
+        if t == "true" {Ok(Token::Boolean(true))}
+        else if t == "false" {Ok(Token::Boolean(false))}
+        else if OPERATORS.contains(&t) {Ok(Token::Operator(t.to_string()))}
+        else if SEPARATORS.contains(&t) {Ok(Token::Separator(t.to_string()))}
+        else if t.parse::<f64>().is_ok() {Ok(Token::Literal(t.parse::<f64>().unwrap()))}
+        else if t.chars().next().unwrap().is_alphabetic() {Ok(Token::Arg(t.to_string()))}
+        else {Err(format!("Invalid token: {}", t))}
     ).collect()
 }
 
@@ -43,7 +43,7 @@ pub fn parse(txt: &str) -> Vec<Token> {
 
 
 /// Convert an infix vec of tokens into a postfix stream one
-pub fn infix_to_postfix(tokens: Vec<Token>) -> Vec<Token> {
+pub fn infix_to_postfix(tokens: Vec<Token>) -> Result<Vec<Token>, String> {
     let mut res = vec![];
     let mut token_stack = vec![];
 
@@ -63,7 +63,7 @@ pub fn infix_to_postfix(tokens: Vec<Token>) -> Vec<Token> {
                     }
                     token_stack.pop().unwrap();
                 }
-                else {panic!("Invalid predicate string")}
+                else {return Err(format!("Invalid predicate string"))}
             },
 
             Token::Arg(_) => res.push(t),
@@ -76,14 +76,14 @@ pub fn infix_to_postfix(tokens: Vec<Token>) -> Vec<Token> {
         res.push(token_stack.pop().unwrap())
     }
 
-    res
+    Ok(res)
 }
 
 
 
 /// Create a predicate from a infix string for example `(x > 5) && (x < 10)
-pub fn parse_predicate(txt: &str) -> Predicate<f64> {
-    let tokens = infix_to_postfix(parse(txt));
+pub fn parse_predicate(txt: &str) -> Result<Predicate<f64>, String> {
+    let tokens = infix_to_postfix(parse(txt)?)?;
 
     let mut predicate_stack = vec![];
     let mut value_stack = vec![];
@@ -100,7 +100,7 @@ pub fn parse_predicate(txt: &str) -> Predicate<f64> {
 
             Token::Operator(op) => {
                 if VALUE_OPS.contains(&op.as_str()) {
-                    if value_stack.len() < 2 {panic!("Invalid predicate string")}
+                    if value_stack.len() < 2 {return Err(format!("Invalid predicate string"))}
 
                     let v2 = value_stack.pop().unwrap();
                     let v1 = value_stack.pop().unwrap();
@@ -112,12 +112,12 @@ pub fn parse_predicate(txt: &str) -> Predicate<f64> {
                         "<" => predicate_stack.push(Predicate::LowerThan(v1, v2)),
                         ">=" => predicate_stack.push(Predicate::GreaterEqual(v1, v2)),
                         "<=" => predicate_stack.push(Predicate::LowerEqual(v1, v2)),
-                        _ => panic!("Invalid predicate string")
+                        _ => return Err(format!("Invalid predicate string"))
                     }
                 }
 
                 else if PREDICATE_OPS.contains(&op.as_str()) {
-                    if predicate_stack.len() < 2 {panic!("Invalid predicate string")}
+                    if predicate_stack.len() < 2 {return Err(format!("Invalid predicate string"))}
 
                     let p2 = predicate_stack.pop().unwrap();
                     let p1 = predicate_stack.pop().unwrap();
@@ -127,7 +127,7 @@ pub fn parse_predicate(txt: &str) -> Predicate<f64> {
                         "||" => predicate_stack.push(Predicate::Or(Box::new(p1), Box::new(p2))),
                         "&&" => predicate_stack.push(Predicate::And(Box::new(p1), Box::new(p2))),
                         "!" => predicate_stack.push(Predicate::Not(Box::new(p1))),
-                        _ => panic!("Invalid predicate string")
+                        _ => return Err(format!("Invalid predicate string"))
                     }
                 }
             },
@@ -139,6 +139,8 @@ pub fn parse_predicate(txt: &str) -> Predicate<f64> {
     }
 
     // At this point there should be only one predicate in the stack
-    if predicate_stack.len() != 1 {panic!("Invalid predicate string")}
-    predicate_stack.pop().unwrap()
+    match predicate_stack.pop() {
+        Some(p) => Ok(p),
+        None => Err(format!("Invalid predicate string"))
+    }
 }
