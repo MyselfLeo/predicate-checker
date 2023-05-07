@@ -26,18 +26,13 @@ pub enum Value<T: Num + PartialOrd> {
 pub enum Predicate<T: Num + PartialOrd> {
     True,
     False,
-    BoolArg,
+    BoolArg(String),                        // identified by a string, not its value (as it is unknown)
 
     LowerThan(Value<T>, Value<T>),
     LowerEqual(Value<T>, Value<T>),
     GreaterThan(Value<T>, Value<T>),
     GreaterEqual(Value<T>, Value<T>),
     Equal(Value<T>, Value<T>),
-
-    BetweenInclude(Value<T>, Value<T>, Value<T>),
-    BetweenExclude(Value<T>, Value<T>, Value<T>),
-    BetweenIncExc(Value<T>, Value<T>, Value<T>),
-    BetweenExcInc(Value<T>, Value<T>, Value<T>),
 
     Not(Box<Predicate<T>>),
     And(Box<Predicate<T>>, Box<Predicate<T>>),
@@ -50,14 +45,15 @@ pub enum Predicate<T: Num + PartialOrd> {
 
 
 impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
+
     /// Return the domain representing the values for which the predicate is true.
     /// If the predicate is based solely on arguments, the domain is unknown, so a full domain is returned.
-    pub fn get_domain(&self) -> Domain<T> {
+    pub fn get_domain(&self, arg_name: String) -> Domain<T> {
 
         match self {
             Predicate::True => Domain::_true(),
             Predicate::False => Domain::_false(),
-            Predicate::BoolArg => todo!(),
+            Predicate::BoolArg(_) => Domain::_true(), // Unknown value => full domain
 
             Predicate::LowerThan(v1, v2) => {
                 match (v1, v2) {
@@ -107,59 +103,6 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
                     (Value::Literal(x1), Value::Literal(x2)) => if x1 == x2 {Domain::_true()} else {Domain::_false()},
                 }
             },
-
-
-            Predicate::BetweenInclude(l, c, h) => {
-                match (l, c, h) {
-                    (Value::Arg(_), _, Value::Arg(_)) => Domain::_true(),
-                    (Value::Arg(_), Value::Arg(_), Value::Literal(x)) => Domain::new(None, true, Some(x.clone()), true),
-                    (Value::Arg(_), Value::Literal(x), Value::Literal(_)) => Domain::new(None, true, Some(x.clone()), true),
-                    (Value::Literal(x), Value::Arg(_), Value::Arg(_)) => Domain::new(Some(x.clone()), true, None, true),
-                    (Value::Literal(x1), Value::Arg(_), Value::Literal(x2)) => Domain::new(Some(x1.clone()), true, Some(x2.clone()), true),
-                    (Value::Literal(_), Value::Literal(x), Value::Arg(_)) => Domain::new(Some(x.clone()), true, None, true),
-                    (Value::Literal(x1), Value::Literal(x2), Value::Literal(x3)) => if x1 <= x2 && x2 <= x3 {Domain::_true()} else {Domain::_false()},
-                }
-            },
-
-
-            Predicate::BetweenExclude(l, c, h) => {
-                match (l, c, h) {
-                    (Value::Arg(_), _, Value::Arg(_)) => Domain::_true(),
-                    (Value::Arg(_), Value::Arg(_), Value::Literal(x)) => Domain::new(None, false, Some(x.clone()), false),
-                    (Value::Arg(_), Value::Literal(x), Value::Literal(_)) => Domain::new(None, false, Some(x.clone()), false),
-                    (Value::Literal(x), Value::Arg(_), Value::Arg(_)) => Domain::new(Some(x.clone()), false, None, false),
-                    (Value::Literal(x1), Value::Arg(_), Value::Literal(x2)) => Domain::new(Some(x1.clone()), false, Some(x2.clone()), false),
-                    (Value::Literal(_), Value::Literal(x), Value::Arg(_)) => Domain::new(Some(x.clone()), false, None, false),
-                    (Value::Literal(x1), Value::Literal(x2), Value::Literal(x3)) => if x1 < x2 && x2 < x3 {Domain::_true()} else {Domain::_false()},
-                }
-            },
-
-
-            Predicate::BetweenIncExc(l, c, h) => {
-                match (l, c, h) {
-                    (Value::Arg(_), _, Value::Arg(_)) => Domain::_true(),
-                    (Value::Arg(_), Value::Arg(_), Value::Literal(x)) => Domain::new(None, true, Some(x.clone()), false),
-                    (Value::Arg(_), Value::Literal(x), Value::Literal(_)) => Domain::new(None, true, Some(x.clone()), false),
-                    (Value::Literal(x), Value::Arg(_), Value::Arg(_)) => Domain::new(Some(x.clone()), true, None, false),
-                    (Value::Literal(x1), Value::Arg(_), Value::Literal(x2)) => Domain::new(Some(x1.clone()), true, Some(x2.clone()), false),
-                    (Value::Literal(_), Value::Literal(x), Value::Arg(_)) => Domain::new(Some(x.clone()), true, None, false),
-                    (Value::Literal(x1), Value::Literal(x2), Value::Literal(x3)) => if x1 <= x2 && x2 < x3 {Domain::_true()} else {Domain::_false()},
-                }
-            },
-
-
-            Predicate::BetweenExcInc(l, c, h) => {
-                match (l, c, h) {
-                    (Value::Arg(_), _, Value::Arg(_)) => Domain::_true(),
-                    (Value::Arg(_), Value::Arg(_), Value::Literal(x)) => Domain::new(None, false, Some(x.clone()), true),
-                    (Value::Arg(_), Value::Literal(x), Value::Literal(_)) => Domain::new(None, false, Some(x.clone()), true),
-                    (Value::Literal(x), Value::Arg(_), Value::Arg(_)) => Domain::new(Some(x.clone()), false, None, true),
-                    (Value::Literal(x1), Value::Arg(_), Value::Literal(x2)) => Domain::new(Some(x1.clone()), false, Some(x2.clone()), true),
-                    (Value::Literal(_), Value::Literal(x), Value::Arg(_)) => Domain::new(Some(x.clone()), false, None, true),
-                    (Value::Literal(x1), Value::Literal(x2), Value::Literal(x3)) => if x1 < x2 && x2 <= x3 {Domain::_true()} else {Domain::_false()},
-                }
-            },
-
 
             Predicate::Not(p) => Domain::complement(p.get_domain()),
             Predicate::And(p1, p2) => Domain::intersection(p1.get_domain(), p2.get_domain()),

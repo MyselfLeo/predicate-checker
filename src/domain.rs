@@ -244,9 +244,6 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Domain<T> {
 
     /// Return a simplified [Domain] by merging adjacent [Interval]s.
     pub fn simplified(&self) -> Domain<T> {
-
-        println!("Simplifying {:?}", self);
-
         if self.parts.is_empty() {return self.clone()}
 
         let mut remaining_parts = self.parts.clone();
@@ -256,73 +253,19 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Domain<T> {
 
 
         while !remaining_parts.is_empty() {
-            println!("    Step: {:?}", res);
             let mut current = remaining_parts.pop().unwrap();
 
             let mut j: isize = remaining_parts.len() as isize - 1;
             while j >= 0 {
-                print!("    Computing union of {:?} and {:?}   ->   ", current, remaining_parts[j as usize]);
-
                 if let Some(union) = Interval::union(current.clone(), remaining_parts[j as usize].clone()) {
                     current = union;
                     remaining_parts.remove(j as usize);
-                    println!("{:?}", current);
                 }
-                else {println!("No union")}
-
                 j-=1;
             }
             res.parts.push(current);
         }
-
-
-
-        /*let mut i = 0;
-        while i < self.parts.len() {
-
-            println!("  Step {i}: {:?}", res);
-
-            let mut new_interval = self.parts[i].clone();
-
-            let mut others = Vec::from(self.parts.split_at(i+1).1);
-            let mut j: isize = others.len() as isize - 1;
-            while j >= 0 {
-                print!("  Computing union of  {:?} and {:?}   -> ", new_interval, others[j as usize]);
-                if let Some(union) = Interval::union(new_interval.clone(), others[j as usize].clone()) {
-                    new_interval = union;
-                    others.remove(j as usize);
-                    println!("{:?}", new_interval);
-                }
-                else {
-                    println!("No union");
-                }
-                j -= 1;
-            }
-            res.parts.push(new_interval);
-
-            i += 1;
-        }*/
-
-
-
-        /*
-        let mut i = 0;
-        while i < res.parts.len() - 1 {
-            let mut j = 0;
-            while j < res.parts.len() - 1 {
-                if i == j {j += 1; continue;}
-                if let Some(union) = Interval::union(res.parts[i].clone(), res.parts[j].clone()) {
-                    res.parts[i] = union;
-                    res.parts.remove(j);
-                } else {
-                    j += 1;
-                }
-            }
-            i += 1;
-        } */
-
-        println!("Result: {:?}", res);
-
+        
         return res
     }
 }

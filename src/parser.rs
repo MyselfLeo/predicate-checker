@@ -26,7 +26,7 @@ pub enum Token {
 
 
 /// Convert a string into a Vec of tokens
-pub fn parse(txt: &String) -> Vec<Token> {
+pub fn parse(txt: &str) -> Vec<Token> {
     let txt_cleaned = txt.replace("(", " ( ").replace(")", " ) ");
     txt_cleaned.split(' ').filter(|x| !x.trim().is_empty()).map( |t|
         if t == "true" {Token::Boolean(true)}
@@ -63,7 +63,7 @@ pub fn infix_to_postfix(tokens: Vec<Token>) -> Vec<Token> {
                     }
                     token_stack.pop().unwrap();
                 }
-                else {panic!("Unexpected separator: {s}")}
+                else {panic!("Invalid predicate string")}
             },
 
             Token::Arg(_) => res.push(t),
@@ -81,9 +81,8 @@ pub fn infix_to_postfix(tokens: Vec<Token>) -> Vec<Token> {
 
 
 
-/// Create a predicate from a infix string.
-/// ex: "(x > 5) && (x < 10)"
-pub fn parse_predicate(txt: &String) -> Predicate<f64> {
+/// Create a predicate from a infix string for example `(x > 5) && (x < 10)
+pub fn parse_predicate(txt: &str) -> Predicate<f64> {
     let tokens = infix_to_postfix(parse(txt));
 
     let mut predicate_stack = vec![];
@@ -101,7 +100,7 @@ pub fn parse_predicate(txt: &String) -> Predicate<f64> {
 
             Token::Operator(op) => {
                 if VALUE_OPS.contains(&op.as_str()) {
-                    if value_stack.len() < 2 {panic!("Unexpected operator: {op}")}
+                    if value_stack.len() < 2 {panic!("Invalid predicate string")}
 
                     let v2 = value_stack.pop().unwrap();
                     let v1 = value_stack.pop().unwrap();
@@ -113,12 +112,12 @@ pub fn parse_predicate(txt: &String) -> Predicate<f64> {
                         "<" => predicate_stack.push(Predicate::LowerThan(v1, v2)),
                         ">=" => predicate_stack.push(Predicate::GreaterEqual(v1, v2)),
                         "<=" => predicate_stack.push(Predicate::LowerEqual(v1, v2)),
-                        _ => panic!("Unexpected operator: {op}")
+                        _ => panic!("Invalid predicate string")
                     }
                 }
 
                 else if PREDICATE_OPS.contains(&op.as_str()) {
-                    if predicate_stack.len() < 2 {panic!("Unexpected operator: {op}")}
+                    if predicate_stack.len() < 2 {panic!("Invalid predicate string")}
 
                     let p2 = predicate_stack.pop().unwrap();
                     let p1 = predicate_stack.pop().unwrap();
@@ -128,7 +127,7 @@ pub fn parse_predicate(txt: &String) -> Predicate<f64> {
                         "||" => predicate_stack.push(Predicate::Or(Box::new(p1), Box::new(p2))),
                         "&&" => predicate_stack.push(Predicate::And(Box::new(p1), Box::new(p2))),
                         "!" => predicate_stack.push(Predicate::Not(Box::new(p1))),
-                        _ => panic!("Unexpected operator: {op}")
+                        _ => panic!("Invalid predicate string")
                     }
                 }
             },
@@ -140,6 +139,6 @@ pub fn parse_predicate(txt: &String) -> Predicate<f64> {
     }
 
     // At this point there should be only one predicate in the stack
-    if predicate_stack.len() != 1 {panic!("Invalid predicate")}
+    if predicate_stack.len() != 1 {panic!("Invalid predicate string")}
     predicate_stack.pop().unwrap()
 }
