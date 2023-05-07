@@ -61,5 +61,10 @@ fn main() {
      */
 
 
-    println!("{:?}", parser::parse("(x > 5) && (x < 3)".to_string()));
+    //println!("{:?}", parser::parse("(x > 5) && (x < 3)".to_string()));
+
+    let input = "(x > 5) && (x < 3)".to_string();
+    let tokens = parser::parse(input);
+    println!("Infix: {:?}", tokens);
+    println!("Postfix: {:?}", parser::infix_to_postfix(tokens));
 }
