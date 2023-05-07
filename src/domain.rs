@@ -97,9 +97,8 @@ impl<T: Num + PartialOrd + Clone + Debug + Display> Interval<T> {
 
 
         let (lower, incl_lower) = match (d1.lower, d2.lower) {
-            (None, None) => (None, d1.incl_lower),
-            (None, Some(x)) => (Some(x), d2.incl_lower),
-            (Some(x), None) => (Some(x), d1.incl_lower),
+            (None, _) => (None, d1.incl_lower),
+            (_, None) => (None, d1.incl_lower),
             
             (Some(x1), Some(x2)) => {
                 if x1 < x2 {(Some(x1), d1.incl_lower)}
@@ -109,9 +108,8 @@ impl<T: Num + PartialOrd + Clone + Debug + Display> Interval<T> {
         };
 
         let (greater, incl_greater) = match (d1.greater, d2.greater) {
-            (None, None) => (None, d1.incl_greater),
-            (None, Some(x)) => (Some(x), d2.incl_greater),
-            (Some(x), None) => (Some(x), d1.incl_greater),
+            (None, _) => (None, d1.incl_greater),
+            (_, None) => (None, d1.incl_greater),
             
             (Some(x1), Some(x2)) => {
                 if x1 > x2 {(Some(x1), d1.incl_greater)}
@@ -265,7 +263,7 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Domain<T> {
             }
             res.parts.push(current);
         }
-        
+
         return res
     }
 }

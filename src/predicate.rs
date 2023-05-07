@@ -242,18 +242,26 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
 
 
     /// A Predicate A "fits" a Predicate B if:
-    /// - A and B use the same arguments
+    /// - B uses only arguments used by A
     /// - For every argument used by both A and B, the validity domain of A is a subset of the validity domain of B
     pub fn fits(&self, other: &Predicate<T>) -> bool {
+        // A is self, B is other
+
         let self_args = self.get_arguments();
         let other_args = other.get_arguments();
 
-        if self_args != other_args {return false;}
+        // Check that B uses only arguments used by A
+        for a in other_args.iter() {
+            if !self_args.contains(a) {return false;}
+        }
 
         // Check validity domains for arguments used both by A and B
-        for a in self_args.iter() {
+        for a in other_args.iter() {
             let d1 = self.get_domain(a);
             let d2 = other.get_domain(a);
+
+            println!("Union of {:?} & {:?} : {:?}", d1, d2, Domain::union(d1.clone(), d2.clone()));
+
             if Domain::union(d1, d2.clone()) != d2 {return false;}
         }
 
