@@ -40,6 +40,17 @@ fn parse(txt: String) -> Vec<Token> {
 
 
 
+/// Convert an infix vec of tokens into a postfix stream one
+fn infix_to_postfix(tokens: Vec<Token>) -> Vec<Token> {
+    let mut res = vec![];
+    let mut token_stack = vec![];
+
+    
+}
+
+
+
+/*
 pub fn parse_predicate(txt: String) -> Predicate<f64> {
     let tokens = parse(txt);
     
@@ -62,4 +73,4 @@ pub fn parse_predicate(txt: String) -> Predicate<f64> {
     
     
     todo!()
-}
+} */
