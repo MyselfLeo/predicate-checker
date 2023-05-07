@@ -26,7 +26,7 @@ pub enum Token {
 
 
 /// Convert a string into a Vec of tokens
-pub fn parse(txt: String) -> Vec<Token> {
+pub fn parse(txt: &String) -> Vec<Token> {
     let txt_cleaned = txt.replace("(", " ( ").replace(")", " ) ");
     txt_cleaned.split(' ').filter(|x| !x.trim().is_empty()).map( |t|
         if t == "true" {Token::Boolean(true)}
@@ -83,7 +83,7 @@ pub fn infix_to_postfix(tokens: Vec<Token>) -> Vec<Token> {
 
 /// Create a predicate from a infix string.
 /// ex: "(x > 5) && (x < 10)"
-pub fn parse_predicate(txt: String) -> Predicate<f64> {
+pub fn parse_predicate(txt: &String) -> Predicate<f64> {
     let tokens = infix_to_postfix(parse(txt));
 
     let mut predicate_stack = vec![];
@@ -101,18 +101,35 @@ pub fn parse_predicate(txt: String) -> Predicate<f64> {
 
             Token::Operator(op) => {
                 if VALUE_OPS.contains(&op.as_str()) {
-
                     if value_stack.len() < 2 {panic!("Unexpected operator: {op}")}
 
                     let v2 = value_stack.pop().unwrap();
                     let v1 = value_stack.pop().unwrap();
 
-
-                    match op {
+                    match op.as_str() {
                         //"==", ">", "<", ">=", "<="
-                        todo!()
-                    }                    
+                        "==" => predicate_stack.push(Predicate::Equal(v1, v2)),
+                        ">" => predicate_stack.push(Predicate::GreaterThan(v1, v2)),
+                        "<" => predicate_stack.push(Predicate::LowerThan(v1, v2)),
+                        ">=" => predicate_stack.push(Predicate::GreaterEqual(v1, v2)),
+                        "<=" => predicate_stack.push(Predicate::LowerEqual(v1, v2)),
+                        _ => panic!("Unexpected operator: {op}")
+                    }
+                }
 
+                else if PREDICATE_OPS.contains(&op.as_str()) {
+                    if predicate_stack.len() < 2 {panic!("Unexpected operator: {op}")}
+
+                    let p2 = predicate_stack.pop().unwrap();
+                    let p1 = predicate_stack.pop().unwrap();
+
+                    match op.as_str() {
+                        //"||", "&&", "!"
+                        "||" => predicate_stack.push(Predicate::Or(Box::new(p1), Box::new(p2))),
+                        "&&" => predicate_stack.push(Predicate::And(Box::new(p1), Box::new(p2))),
+                        "!" => predicate_stack.push(Predicate::Not(Box::new(p1))),
+                        _ => panic!("Unexpected operator: {op}")
+                    }
                 }
             },
 
@@ -122,7 +139,7 @@ pub fn parse_predicate(txt: String) -> Predicate<f64> {
 
     }
 
-    
-    
-    todo!()
+    // At this point there should be only one predicate in the stack
+    if predicate_stack.len() != 1 {panic!("Invalid predicate")}
+    predicate_stack.pop().unwrap()
 }
