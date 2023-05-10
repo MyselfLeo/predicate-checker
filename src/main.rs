@@ -8,7 +8,6 @@ fn main() {
     let b = Predicate::from("x > 0").unwrap();
 
     println!("{:?}", a.implies(&b));
-    println!("{:?}", a.implies_test(&b));
 
     //let b = Predicate::from("(x > 0) && (y > 2)").unwrap();
     //println!("{}", a.implies(&b));

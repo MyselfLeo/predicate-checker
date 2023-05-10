@@ -279,41 +279,4 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
 
         true
     }
-
-
-    pub fn implies_test(&self, other: &Predicate<T>) -> bool {
-        // A is self, B is other
-
-        let self_args = self.get_arguments();
-        let other_args = other.get_arguments();
-
-
-        // special cases for Or
-        match self {
-            Predicate::Or(lp, rp) => {
-                println!("special case between {:?} and {:?}", lp, rp);
-                // Only one of the predicates must imply the other one
-                lp.implies_test(other) || rp.implies_test(other)
-            },
-
-
-            _ => {
-                println!("No special case for {:?}", self);
-                // Check that B uses only arguments used by A
-                for a in other_args.iter() {
-                    if !self_args.contains(a) {return false;}
-                }
-
-                // Check validity domains for arguments used both by A and B
-                for a in other_args.iter() {
-                    let d1 = self.get_domain(a);
-                    let d2 = other.get_domain(a);
-
-                    if Domain::union(d1, d2.clone()) != d2 {return false;}
-                }
-
-                true
-            }
-        }
-    }
 }
