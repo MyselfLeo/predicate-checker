@@ -43,25 +43,42 @@ pub fn parse(txt: &str) -> Result<Vec<Token>, String> {
 
 
 /// Convert an infix vec of tokens into a postfix stream one
+/// This function uses the Shunting-Yard algorithm
 pub fn infix_to_postfix(tokens: Vec<Token>) -> Result<Vec<Token>, String> {
     let mut res = vec![];
-    let mut token_stack = vec![];
+    let mut operator_stack = vec![];
 
     for t in tokens {
         match &t {
-            Token::Operator(_) => {
-                token_stack.push(t);
+            Token::Operator(x) => {
+
+                if VALUE_OPS.contains(&x.as_str()) {    // Value operators (<, ==, etc.) have a higher precidence than boolean operators (&&, ||, etc.)
+                    while let Some(Token::Operator(x)) = operator_stack.last() {
+                        if !VALUE_OPS.contains(&x.as_str()) {break;}
+                        else {
+                            res.push(operator_stack.pop().unwrap());
+                        }
+                    }
+                }
+
+                else if PREDICATE_OPS.contains(&x.as_str()) {
+                    while let Some(Token::Operator(_)) = operator_stack.last() {
+                        res.push(operator_stack.pop().unwrap());
+                    }
+                }
+
+                operator_stack.push(t);
             },
 
             Token::Separator(s) => {
                 if s == "(" {
-                    token_stack.push(t);
+                    operator_stack.push(t);
                 }
                 else if s == ")" {
-                    while *token_stack.last().unwrap() != Token::Separator("(".to_string()) {
-                        res.push(token_stack.pop().unwrap())
+                    while *operator_stack.last().unwrap() != Token::Separator("(".to_string()) {
+                        res.push(operator_stack.pop().unwrap())
                     }
-                    token_stack.pop().unwrap();
+                    operator_stack.pop().unwrap();
                 }
                 else {return Err(format!("Invalid predicate string"))}
             },
@@ -72,8 +89,8 @@ pub fn infix_to_postfix(tokens: Vec<Token>) -> Result<Vec<Token>, String> {
         }
     }    
 
-    while !token_stack.is_empty() {
-        res.push(token_stack.pop().unwrap())
+    while !operator_stack.is_empty() {
+        res.push(operator_stack.pop().unwrap())
     }
 
     Ok(res)

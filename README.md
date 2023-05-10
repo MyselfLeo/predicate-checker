@@ -16,8 +16,6 @@ use predicatechecker::Predicate;
 let predicate = Predicate::from("(x > 2) && (y == 4) && (z < 10)").unwrap();
 ```
 
-> Note: the parser is a bit off and may complain if comparaison operations are not between parenthesis. Sorry!
-
 Now, you can check if a predicate "fits" into another:
 
 ```rust
