@@ -6,12 +6,29 @@ use crate::domain::Domain;
 use crate::parser::parse_predicate;
 
 
+/// Represent the "level" of an implication between two predicates A and B
+pub enum Implication {
+    /// Any value that verifies A will verify B
+    Total,
+
+    /// only a subset of the values that verify A will verify B.
+    /// This happens because the predicate A uses an "or" operation for which only one operand verifies B.
+    Partial,
+
+    /// The verification of A by a value x is not enough to 
+    /// know that x also verifies B
+    Inexistant
+}
+
+
 /// In a [Predicate], a value can either be a literal or an argument.
-/// The latter are identified by a string, as there can be multiple arguments in a
-/// given predicate.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value<T: Num + PartialOrd> {
+    /// Identifies by a string an argument which value is not known.
+    /// A Predicate can have multiple arguments, explaining the need to use a string-based identification.
     Arg(String),
+
+    /// A known value, allowing for simplifications (for example, `5 > 4` is simplified to `True`)
     Literal(T)
 }
 
