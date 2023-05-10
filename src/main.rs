@@ -8,5 +8,5 @@ fn main() {
     println!("{:?}", b);
 
     //let b = Predicate::from("(x > 0) && (y > 2)").unwrap();
-    //println!("{}", a.fits(&b));
+    //println!("{}", a.implies(&b));
 }

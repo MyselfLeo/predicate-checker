@@ -255,10 +255,10 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
 
 
 
-    /// A Predicate A "fits" a Predicate B if:
+    /// A Predicate A "implies" a Predicate B if:
     /// - B uses only arguments used by A
     /// - For every argument used by both A and B, the validity domain of A is a subset of the validity domain of B
-    pub fn fits(&self, other: &Predicate<T>) -> bool {
+    pub fn implies(&self, other: &Predicate<T>) -> bool {
         // A is self, B is other
 
         let self_args = self.get_arguments();
