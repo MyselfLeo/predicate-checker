@@ -9,11 +9,11 @@ For example, given the predicates `A: x > 5` and `B: x > 6`, the library can (us
 
 ## Usage
 
-The `Predicate` enum represents a boolean expression. You can build one "manually" by assembling other `Predicate`, or using the builtin parser:
+The `Predicate` enum represents a boolean expression. You can build one "manually" by assembling other `Predicate<T>` (`T` being a numerical type), or using the builtin parser:
 
 ```rust
 use predicatechecker::Predicate;
-let predicate = Predicate::from("(x > 2) && (y == 4) && (z < 10)").unwrap();
+let predicate = Predicate::from("(x > 2) && (y == 4) && (z < 10)").unwrap(); // returns a Predicate<f64>
 ```
 
 Now, you can check if a predicate "implies" into another:
