@@ -7,6 +7,7 @@ use crate::parser::parse_predicate;
 
 
 /// Represent the "level" of an implication between two predicates A and B
+#[derive(Debug, Clone, Copy)]
 pub enum Implication {
     /// Any value that verifies A will verify B
     Total,
@@ -272,28 +273,40 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
 
 
 
-    /// A Predicate A "implies" a Predicate B if:
-    /// - B uses only arguments used by A
-    /// - For every argument used by both A and B, the validity domain of A is a subset of the validity domain of B
-    pub fn implies(&self, other: &Predicate<T>) -> bool {
+    /// Return the level of [Implication] between two predicates A (self) and B (other).
+    pub fn implies(&self, other: &Predicate<T>) -> Implication {
         // A is self, B is other
 
         let self_args = self.get_arguments();
         let other_args = other.get_arguments();
 
-        // Check that B uses only arguments used by A
-        for a in other_args.iter() {
-            if !self_args.contains(a) {return false;}
+
+        // special case for Or
+        match self {
+            Predicate::Or(lp, rp) => {
+                match (lp.implies(other), rp.implies(other)) {
+                    (Implication::Total, Implication::Total) => Implication::Total,
+                    (Implication::Inexistant, Implication::Inexistant) => Implication::Inexistant,
+                    _ => Implication::Partial
+                }
+            },
+
+            _ => {
+                // Check that B uses only arguments used by A
+                for a in other_args.iter() {
+                    if !self_args.contains(a) {return Implication::Inexistant;}
+                }
+
+                // Check validity domains for arguments used both by A and B
+                for a in other_args.iter() {
+                    let d1 = self.get_domain(a);
+                    let d2 = other.get_domain(a);
+
+                    if Domain::union(d1, d2.clone()) != d2 {return Implication::Inexistant;}
+                }
+
+                Implication::Total
+            }
         }
-
-        // Check validity domains for arguments used both by A and B
-        for a in other_args.iter() {
-            let d1 = self.get_domain(a);
-            let d2 = other.get_domain(a);
-
-            if Domain::union(d1, d2.clone()) != d2 {return false;}
-        }
-
-        true
     }
 }
