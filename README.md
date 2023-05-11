@@ -36,7 +36,8 @@ The `implies` function can return 3 different values: `Implication::Total`, `Imp
 
 
 ## Installation
-You can clone this repository and use it in your own projects (see [Specifying Dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html) from The Cargo Book). I do not plan to make it available on `crates.io` for now.
+
+You can clone this repository and use it in your own projects (see [Specifying Dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html) from The Cargo Book).
 
 
 ## License
