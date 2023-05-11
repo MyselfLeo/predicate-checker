@@ -37,8 +37,13 @@ The `implies` function can return 3 different values: `Implication::Total`, `Imp
 
 ## Installation
 
-You can clone this repository and use it in your own projects (see [Specifying Dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html) from The Cargo Book).
+The easiest way to add it to your projects is by using cargo. Add it to your `Cargo.toml` file:
+```
+[dependencies]
+predicatechecker = "0.5.1"
+```
 
+You can also clone this repository and use it in your own projects (see [Specifying Dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html) from The Cargo Book).
 
 ## License
 
