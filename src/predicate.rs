@@ -309,4 +309,156 @@ impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug + FromStr> Pred
             }
         }
     }
+
+
+
+
+
+
+
+
+
+
+    /// Return a simplified version of this Predicate.
+    pub fn simplify(&self) -> Predicate<T> {
+
+        match self {
+            Predicate::LowerThan(Value::Literal(l1), Value::Literal(l2)) => {
+                if l1 < l2 {Predicate::True}
+                else {Predicate::False}
+            },
+
+            Predicate::LowerEqual(Value::Literal(l1), Value::Literal(l2)) => {
+                if l1 <= l2 {Predicate::True}
+                else {Predicate::False}
+            },
+
+            Predicate::GreaterThan(Value::Literal(l1), Value::Literal(l2)) => {
+                if l1 > l2 {Predicate::True}
+                else {Predicate::False}
+            },
+
+            Predicate::GreaterEqual(Value::Literal(l1), Value::Literal(l2)) =>  {
+                if l1 >= l2 {Predicate::True}
+                else {Predicate::False}
+            },
+
+            Predicate::Equal(Value::Literal(l1), Value::Literal(l2)) => {
+                if l1 == l2 {Predicate::True}
+                else {Predicate::False}
+            },
+
+            Predicate::Equal(Value::Arg(a1), Value::Arg(a2)) => {
+                if a1 == a2 {Predicate::True}
+                else {self.clone()}
+            }
+
+            Predicate::Not(p) => {
+                match p.as_ref() {
+                    Predicate::True => Predicate::False,
+                    Predicate::False => Predicate::True,
+
+                    Predicate::LowerThan(v1, v2) => Predicate::GreaterEqual(v1.clone(), v2.clone()),
+                    Predicate::LowerEqual(v1, v2) => Predicate::GreaterThan(v1.clone(), v2.clone()),
+                    Predicate::GreaterThan(v1, v2) => Predicate::LowerEqual(v1.clone(), v2.clone()),
+                    Predicate::GreaterEqual(v1, v2) => Predicate::LowerThan(v1.clone(), v2.clone()),
+
+                    _ => self.clone()
+                }
+            }
+
+            Predicate::And(p1, p2) => {
+                match (p1.as_ref(), p2.as_ref()) {
+                    (Predicate::False, _) => Predicate::False,
+                    (_, Predicate::False) => Predicate::False,
+
+                    (Predicate::True, p) => p.clone(),
+                    (p, Predicate::True) => p.clone(),
+
+                    (Predicate::BoolArg(b1), Predicate::BoolArg(b2)) => {
+                        if b1 == b2 {Predicate::BoolArg(b1.clone())}
+                        else {self.clone()}
+                    },
+
+                    (Predicate::LowerThan(_, _), Predicate::LowerThan(_, _)) => todo!(),
+                    (Predicate::LowerThan(_, _), Predicate::LowerEqual(_, _)) => todo!(),
+                    (Predicate::LowerThan(_, _), Predicate::GreaterThan(_, _)) => todo!(),
+                    (Predicate::LowerThan(_, _), Predicate::GreaterEqual(_, _)) => todo!(),
+                    (Predicate::LowerThan(_, _), Predicate::Equal(_, _)) => todo!(),
+                    (Predicate::LowerThan(_, _), Predicate::Not(_)) => todo!(),
+                    (Predicate::LowerThan(_, _), Predicate::And(_, _)) => todo!(),
+                    (Predicate::LowerThan(_, _), Predicate::Or(_, _)) => todo!(),
+                    (Predicate::LowerEqual(_, _), Predicate::LowerThan(_, _)) => todo!(),
+                    (Predicate::LowerEqual(_, _), Predicate::LowerEqual(_, _)) => todo!(),
+                    (Predicate::LowerEqual(_, _), Predicate::GreaterThan(_, _)) => todo!(),
+                    (Predicate::LowerEqual(_, _), Predicate::GreaterEqual(_, _)) => todo!(),
+                    (Predicate::LowerEqual(_, _), Predicate::Equal(_, _)) => todo!(),
+                    (Predicate::LowerEqual(_, _), Predicate::Not(_)) => todo!(),
+                    (Predicate::LowerEqual(_, _), Predicate::And(_, _)) => todo!(),
+                    (Predicate::LowerEqual(_, _), Predicate::Or(_, _)) => todo!(),
+                    (Predicate::GreaterThan(_, _), Predicate::LowerThan(_, _)) => todo!(),
+                    (Predicate::GreaterThan(_, _), Predicate::LowerEqual(_, _)) => todo!(),
+                    (Predicate::GreaterThan(_, _), Predicate::GreaterThan(_, _)) => todo!(),
+                    (Predicate::GreaterThan(_, _), Predicate::GreaterEqual(_, _)) => todo!(),
+                    (Predicate::GreaterThan(_, _), Predicate::Equal(_, _)) => todo!(),
+                    (Predicate::GreaterThan(_, _), Predicate::Not(_)) => todo!(),
+                    (Predicate::GreaterThan(_, _), Predicate::And(_, _)) => todo!(),
+                    (Predicate::GreaterThan(_, _), Predicate::Or(_, _)) => todo!(),
+                    (Predicate::GreaterEqual(_, _), Predicate::LowerThan(_, _)) => todo!(),
+                    (Predicate::GreaterEqual(_, _), Predicate::LowerEqual(_, _)) => todo!(),
+                    (Predicate::GreaterEqual(_, _), Predicate::GreaterThan(_, _)) => todo!(),
+                    (Predicate::GreaterEqual(_, _), Predicate::GreaterEqual(_, _)) => todo!(),
+                    (Predicate::GreaterEqual(_, _), Predicate::Equal(_, _)) => todo!(),
+                    (Predicate::GreaterEqual(_, _), Predicate::Not(_)) => todo!(),
+                    (Predicate::GreaterEqual(_, _), Predicate::And(_, _)) => todo!(),
+                    (Predicate::GreaterEqual(_, _), Predicate::Or(_, _)) => todo!(),
+                    (Predicate::Equal(_, _), Predicate::LowerThan(_, _)) => todo!(),
+                    (Predicate::Equal(_, _), Predicate::LowerEqual(_, _)) => todo!(),
+                    (Predicate::Equal(_, _), Predicate::GreaterThan(_, _)) => todo!(),
+                    (Predicate::Equal(_, _), Predicate::GreaterEqual(_, _)) => todo!(),
+                    (Predicate::Equal(_, _), Predicate::Equal(_, _)) => todo!(),
+                    (Predicate::Equal(_, _), Predicate::Not(_)) => todo!(),
+                    (Predicate::Equal(_, _), Predicate::And(_, _)) => todo!(),
+                    (Predicate::Equal(_, _), Predicate::Or(_, _)) => todo!(),
+                    (Predicate::Not(_), Predicate::LowerThan(_, _)) => todo!(),
+                    (Predicate::Not(_), Predicate::LowerEqual(_, _)) => todo!(),
+                    (Predicate::Not(_), Predicate::GreaterThan(_, _)) => todo!(),
+                    (Predicate::Not(_), Predicate::GreaterEqual(_, _)) => todo!(),
+                    (Predicate::Not(_), Predicate::Equal(_, _)) => todo!(),
+                    (Predicate::Not(_), Predicate::Not(_)) => todo!(),
+                    (Predicate::Not(_), Predicate::And(_, _)) => todo!(),
+                    (Predicate::Not(_), Predicate::Or(_, _)) => todo!(),
+                    (Predicate::And(_, _), Predicate::LowerThan(_, _)) => todo!(),
+                    (Predicate::And(_, _), Predicate::LowerEqual(_, _)) => todo!(),
+                    (Predicate::And(_, _), Predicate::GreaterThan(_, _)) => todo!(),
+                    (Predicate::And(_, _), Predicate::GreaterEqual(_, _)) => todo!(),
+                    (Predicate::And(_, _), Predicate::Equal(_, _)) => todo!(),
+                    (Predicate::And(_, _), Predicate::Not(_)) => todo!(),
+                    (Predicate::And(_, _), Predicate::And(_, _)) => todo!(),
+                    (Predicate::And(_, _), Predicate::Or(_, _)) => todo!(),
+                    (Predicate::Or(_, _), Predicate::LowerThan(_, _)) => todo!(),
+                    (Predicate::Or(_, _), Predicate::LowerEqual(_, _)) => todo!(),
+                    (Predicate::Or(_, _), Predicate::GreaterThan(_, _)) => todo!(),
+                    (Predicate::Or(_, _), Predicate::GreaterEqual(_, _)) => todo!(),
+                    (Predicate::Or(_, _), Predicate::Equal(_, _)) => todo!(),
+                    (Predicate::Or(_, _), Predicate::Not(_)) => todo!(),
+                    (Predicate::Or(_, _), Predicate::And(_, _)) => todo!(),
+                    (Predicate::Or(_, _), Predicate::Or(_, _)) => todo!(),
+
+                    _ => self.clone()
+                }
+            },
+
+
+
+            Predicate::Or(_, _) => todo!(),
+
+
+
+            _ => self.clone()
+        };
+
+
+        todo!()
+    }
 }
