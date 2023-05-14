@@ -1,4 +1,4 @@
-use std::{fmt::{Display, Debug}, collections::HashSet};
+use std::{fmt::{Display, Debug}, collections::HashSet, str::FromStr};
 
 use num::{Num, ToPrimitive};
 
@@ -7,7 +7,7 @@ use crate::parser::parse_predicate;
 
 
 /// Represent the "level" of an implication between two predicates A and B
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Implication {
     /// Any value that verifies A will verify B
     Total,
@@ -56,23 +56,23 @@ pub enum Predicate<T: Num + PartialOrd> {
 
 
 
-impl Predicate<f64> {
+
+
+impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug + FromStr> Predicate<T> {
     /// Return a predicate from an infix predicate string.
     /// 
     /// # Example
     /// ```
     /// use predicatechecker::Predicate;
     /// 
-    /// let p = Predicate::from("(x > 5) && (x < 10)").unwrap();
+    /// let p = Predicate::<i64>::from("(x > 5) && (x < 10)").unwrap();
     /// ```
-    pub fn from(txt: &str) -> Result<Predicate<f64>, String> {
-        parse_predicate(txt)
+    pub fn from(txt: &str) -> Result<Predicate<T>, String> {
+        parse_predicate::<T>(txt)
     }
-}
 
 
 
-impl<T: Num + PartialOrd + Clone + ToPrimitive + Display + Debug> Predicate<T> {
     /// Return the domain representing the values of the given argument where the Predicate is true.
     /// Thus, the "validity domain" of a predicate is made of one domain for each of its arguments.
     /// A Predicate with no arguments could be simplified to a single boolean value, so this function would not be useful.

@@ -6,6 +6,10 @@
 // A better parser would be the one used in Sloth, which is more general and more robust.
 // cf. https://github.com/MyselfLeo/sloth
 
+use std::{str::FromStr, any::type_name};
+
+use num::Num;
+
 use crate::{Predicate, Value};
 
 const VALUE_OPS: [&str; 5] = ["==", ">", "<", ">=", "<="];
@@ -15,25 +19,30 @@ const OPERATORS: [&str; 8] = ["==", ">", "<", ">=", "<=", "||", "&&", "!"];
 const SEPARATORS: [&str; 2] = ["(", ")"];
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Token {
+pub enum Token<T: Num> {
     Boolean(bool),
     Operator(String),
     Separator(String),
     Arg(String),
-    Literal(f64)
+    Literal(T)
 }
 
 
 
 /// Convert a string into a Vec of tokens
-pub fn parse(txt: &str) -> Result<Vec<Token>, String> {
+pub fn parse<T: Num + FromStr>(txt: &str) -> Result<Vec<Token<T>>, String> {
     let txt_cleaned = txt.replace("(", " ( ").replace(")", " ) ");
     txt_cleaned.split(' ').filter(|x| !x.trim().is_empty()).map( |t|
         if t == "true" {Ok(Token::Boolean(true))}
         else if t == "false" {Ok(Token::Boolean(false))}
         else if OPERATORS.contains(&t) {Ok(Token::Operator(t.to_string()))}
         else if SEPARATORS.contains(&t) {Ok(Token::Separator(t.to_string()))}
-        else if t.parse::<f64>().is_ok() {Ok(Token::Literal(t.parse::<f64>().unwrap()))}
+        else if t.parse::<T>().is_ok() {
+            match t.parse::<T>() {
+                Ok(v) => Ok(Token::Literal(v)),
+                Err(_) => return Err(format!("Unable to parse literal {t} into type {}", type_name::<T>()))
+            }
+        }
         else if t.chars().next().unwrap().is_alphabetic() {Ok(Token::Arg(t.to_string()))}
         else {Err(format!("Invalid token: {}", t))}
     ).collect()
@@ -44,7 +53,7 @@ pub fn parse(txt: &str) -> Result<Vec<Token>, String> {
 
 /// Convert an infix vec of tokens into a postfix stream one
 /// This function uses the Shunting-Yard algorithm
-pub fn infix_to_postfix(tokens: Vec<Token>) -> Result<Vec<Token>, String> {
+pub fn infix_to_postfix<T: Num + FromStr>(tokens: Vec<Token<T>>) -> Result<Vec<Token<T>>, String> {
     let mut res = vec![];
     let mut operator_stack = vec![];
 
@@ -98,8 +107,10 @@ pub fn infix_to_postfix(tokens: Vec<Token>) -> Result<Vec<Token>, String> {
 
 
 
+
+
 /// Create a predicate from a infix string for example `(x > 5) && (x < 10)
-pub fn parse_predicate(txt: &str) -> Result<Predicate<f64>, String> {
+pub fn parse_predicate<T: Num + PartialOrd + FromStr>(txt: &str) -> Result<Predicate<T>, String> {
     let tokens = infix_to_postfix(parse(txt)?)?;
 
     let mut predicate_stack = vec![];
