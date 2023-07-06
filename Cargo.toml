@@ -1,7 +1,7 @@
 [package]
 name = "predicatechecker"
 description = "Check that a predicate is true if another is"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2021"
 authors = ["MyselfLeo <myselfleo@outlook.fr>"]
 readme = "README.md"

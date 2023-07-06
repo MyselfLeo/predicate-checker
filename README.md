@@ -2,7 +2,7 @@
 
 Predicate-checker is a small library written Rust whose only purpose is to check that the validity of a given predicate `A` implies the validity of a predicate `B`.
 
-For example, given the predicates `A: x > 5` and `B: x > 6`, the library can (using the `Predicate::implies()` function) verifies that for every values of `x` where `A` is true, `B` is also true (in this example, it is; so the `A.implies(B)` function would return `Implication::Total`).
+For example, given the predicates `A: x > 5` and `B: x > 6`, the library can (using the `Predicate::implies()` function) verify that for every value of `x` where `A` is true, `B` is also true (in this example, it is; so the `A.implies(B)` function would return `Implication::Total`).
 
 > **Note: this library was not made by a mathematician, nor a good programmer, nor a good gardener. The results are not 100% truthful and should not be used for anything more important than a small project. Sorry!**
 
@@ -16,7 +16,7 @@ use predicatechecker::Predicate;
 let predicate = Predicate::from("(x > 2) && (y == 4) && (z < 10)").unwrap(); // returns a Predicate<f64>
 ```
 
-Now, you can check if a predicate "implies" into another:
+Now, you can check if a predicate "implies" another:
 
 ```rust
 use predicatechecker::Predicate;
